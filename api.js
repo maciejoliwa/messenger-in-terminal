@@ -33,8 +33,10 @@ export async function getAllVisibleThreads(page) {
     }));
 }
 
-export async function getLatestMessagesFromThread(page, threadURL) {
-    await page.goto(threadURL);
+export async function getLatestMessagesFromThread(page, threadURL, goto=true) {
+    if (goto) {
+        await page.goto(threadURL);
+    }
     await page.waitForSelector("div[data-testid='solid-message-bubble']");
     const messages = await page.$$("div[role='gridcell']")
     return await Promise.all(messages.map(async m => {
@@ -46,4 +48,10 @@ export async function getLatestMessagesFromThread(page, threadURL) {
             sender: await (await m.$('h4')).textContent(),
         }
     }));
+}
+
+export async function sendMessage(page, message) {
+    await page.waitForSelector("div[role='textbox'][data-lexical-editor='true']");
+    await page.fill("div[role='textbox'][data-lexical-editor='true']", message);
+    await page.keyboard.press("Enter");
 }
